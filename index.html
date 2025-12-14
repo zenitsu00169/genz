@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GENZ — Study AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --bg:#0b1220;
+  --panel:#0f1b2e;
+  --chat:#0d1726;
+  --user:#3b82f6;
+  --bot:#1f2937;
+  --text:#e5e7eb;
+  --accent:#22d3ee;
+}
+
+body{
+  margin:0;
+  font-family:Segoe UI, Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  height:100vh;
+  display:flex;
+}
+
+.app{
+  display:flex;
+  width:100%;
+}
+
+/* LEFT PANEL */
+.sidebar{
+  width:280px;
+  background:linear-gradient(180deg,#0f1b2e,#071020);
+  padding:16px;
+  box-sizing:border-box;
+}
+
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.logo img{
+  width:40px;
+  height:40px;
+  border-radius:8px;
+}
+
+.logo h2{
+  margin:0;
+  font-size:18px;
+}
+
+.section{
+  margin-bottom:18px;
+}
+
+.section h4{
+  margin:6px 0;
+  font-size:13px;
+  color:#9ca3af;
+}
+
+.quick button{
+  margin:4px 4px 0 0;
+  padding:6px 10px;
+  border:none;
+  border-radius:999px;
+  background:#111827;
+  color:#e5e7eb;
+  cursor:pointer;
+  font-size:12px;
+}
+
+.quick button:hover{background:#1f2937;}
+
+input,select{
+  width:100%;
+  padding:8px;
+  border-radius:6px;
+  border:none;
+  margin-top:6px;
+}
+
+.smallbtn{
+  margin-top:6px;
+  width:100%;
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  background:#1f2937;
+  color:white;
+  cursor:pointer;
+}
+
+/* CHAT AREA */
+.chat-area{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  background:radial-gradient(circle at top,#0b2440,#050b15);
+}
+
+.header{
+  padding:14px 18px;
+  background:linear-gradient(90deg,#0284c7,#06b6d4);
+  color:black;
+  font-weight:600;
+}
+
+.chatbox{
+  flex:1;
+  padding:20px;
+  overflow-y:auto;
+}
+
+.msg{
+  max-width:70%;
+  padding:12px 14px;
+  border-radius:14px;
+  margin-bottom:10px;
+  line-height:1.4;
+}
+
+.user{
+  background:var(--user);
+  margin-left:auto;
+  color:white;
+}
+
+.bot{
+  background:var(--bot);
+}
+
+.inputbar{
+  display:flex;
+  padding:14px;
+  gap:10px;
+}
+
+.inputbar input{
+  flex:1;
+  padding:12px;
+  border-radius:999px;
+}
+
+.inputbar button{
+  padding:12px 18px;
+  border-radius:999px;
+  border:none;
+  background:#22d3ee;
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* SETTINGS PANEL */
+.settings{
+  display:none;
+  padding:14px;
+  background:#020617;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <img src="logo.png" alt="logo">
+    <h2>GENZ — Study AI</h2>
+  </div>
+
+  <div class="section quick">
+    <h4>Quick Topics</h4>
+    <button onclick="quick('photosynthesis')">Photosynthesis</button>
+    <button onclick="quick('world war 2')">WW2</button>
+    <button onclick="quick('gravity')">Gravity</button>
+    <button onclick="quick('gdp')">GDP</button>
+  </div>
+
+  <div class="section">
+    <h4>Username</h4>
+    <input id="username" placeholder="Your name">
+    <button class="smallbtn" onclick="saveUser()">Save</button>
+  </div>
+
+  <div class="section">
+    <h4>Settings</h4>
+    <select onchange="setTheme(this.value)">
+      <option value="dark">Dark</option>
+      <option value="light">Light</option>
+      <option value="neon">Neon</option>
+    </select>
+    <button class="smallbtn" onclick="clearChat()">Delete Chat</button>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div class="chat-area">
+  <div class="header">GENZ — AI Study Assistant</div>
+
+  <div class="chatbox" id="chatbox"></div>
+
+  <div class="inputbar">
+    <input id="input" placeholder="Ask GENZ anything…" 
+      onkeydown="if(event.key==='Enter')send()">
+    <button onclick="send()">Send</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const chatbox=document.getElementById("chatbox");
+const input=document.getElementById("input");
+
+const data={
+ science:{
+  photosynthesis:"Photosynthesis is the process by which green plants make food using sunlight, water and carbon dioxide, releasing oxygen.",
+  gravity:"Gravity is the force that attracts objects toward each other.",
+  motion:"Motion is defined as the change in position or orientation of an object over a period of time, relative to a specific frame of reference.",
+ },
+ history:{
+  "world war 2":"World War II (1939–1945) was a global conflict involving Axis and Allied powers.",
+  "french revolution":"The French Revolution (1789) overthrew monarchy and established republic ideals.",
+  "world war 1":"World War I (WWI), also known as the Great War, was a global conflict that lasted from July 28, 1914, to November 11, 1918.",
+ },
+ geography:{
+  "capital of india":"The capital of India is New Delhi.",
+  "capital of france":"Paris.",
+  "capital of rajasthan":"Jaipur-the Pink City.",
+  "capital of nepal":"Kathmandu.",
+  "map scale":"Map scale shows the relationship between distances on a map and real-world distances.",
+ },
+ politics:{
+  constitution:"A constitution is the supreme law of a country. It defines rights, duties, and structure of government.",
+  democracy:"Democracy is a system of government where people elect their representatives. It ensures freedom, equality, and participation in governance.",
+},
+economics:{
+  gdp:"GDP is the total value of goods and services produced in a country in a year.",
+ },
+ ai:{
+  ai:"Artificial Intelligence is the simulation of human intelligence by machines.",
+  "father of ai":"John McCarthy is known as the father of Artificial Intelligence. He coined the term Artificial Intelligence in 1956.",
+  computer:"A computer is an electronic device that processes data. It has input, processing, storage, and output units.",
+ },
+ culture:{
+  diwali:"Diwali is the Indian festival of lights symbolizing victory of good over evil.",
+  "language spoken in nepal":"Nepali.",
+  "language spoken in maharashtra":"Marathi.",
+ }
+};
+
+function add(msg,type){
+  let d=document.createElement("div");
+  d.className="msg "+type;
+  d.textContent=msg;
+  chatbox.appendChild(d);
+  chatbox.scrollTop=chatbox.scrollHeight;
+}
+
+function send(){
+  let q=input.value.trim();
+  if(!q)return;
+  add(q,"user");
+  input.value="";
+  setTimeout(()=>reply(q),300);
+}
+
+function reply(q){
+  let t=q.toLowerCase();
+
+  // math engine
+  try{
+    if(/^[0-9+\-*/().\s]+$/.test(t)){
+      return add("Answer: "+eval(t),"bot");
+    }
+  }catch{}
+
+  for(let s in data){
+    for(let k in data[s]){
+      if(t.includes(k)){
+        return add(data[s][k],"bot");
+      }
+    }
+  }
+  add("I don’t have that yet, but I’m learning.","bot");
+}
+
+function quick(q){input.value=q;send();}
+
+function saveUser(){
+  localStorage.setItem("genzUser",username.value);
+}
+
+function clearChat(){
+  chatbox.innerHTML="";
+}
+
+function setTheme(t){
+  if(t==="light")document.documentElement.style.setProperty('--bg','#f3f4f6');
+  if(t==="dark")document.documentElement.style.setProperty('--bg','#0b1220');
+  if(t==="neon")document.documentElement.style.setProperty('--bg','#1000');
+}
+
+add("Hi, I’m GENZ — your offline assistant to keep up with your studies.","bot");
+</script>
+
+</body>
+</html>
